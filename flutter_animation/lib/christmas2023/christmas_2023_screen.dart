@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class Christmas2023Screen extends StatefulWidget {
@@ -11,295 +13,104 @@ class Christmas2023Screen extends StatefulWidget {
   State<Christmas2023Screen> createState() => _Christmas2023ScreenState();
 }
 
-class _Christmas2023ScreenState extends State<Christmas2023Screen> {
-  final duration = const Duration(seconds: 1);
-  final _avatarMaxRadius = 100.0;
-  final _giftMaxRadius = 50.0;
-  final _giftBackgroundColor = Colors.orange;
-  final _memberPositions = [
-    const Offset(230 * 0, 0),
-    const Offset(230 * 1, 0),
-    const Offset(230 * 2, 0),
-    const Offset(230 * 3, 0),
-    const Offset(230 * 4, 0),
-    const Offset(230 * 5, 0),
-    const Offset(230 * 0, 0),
-    const Offset(230 * 1, 0),
-    const Offset(230 * 2, 0),
-    const Offset(230 * 3, 0),
-    const Offset(230 * 4, 0),
-    const Offset(230 * 5, 0),
-  ];
-  final _members = [
-    _Member('Pete'),
-    _Member('Alan'),
-    _Member('Annie'),
-    _Member('Ben'),
-    _Member('Enn'),
-    _Member('Jack'),
-    _Member('Jeff'),
-    _Member('Jhen'),
-    _Member('Ken'),
-    _Member('R'),
-    _Member('Peter'),
-    _Member('Rita'),
-  ];
-  final _giftPositions = [
-    const Offset(230 * 0 + 50, 140),
-    const Offset(230 * 1 + 50, 140),
-    const Offset(230 * 2 + 50, 140),
-    const Offset(230 * 3 + 50, 140),
-    const Offset(230 * 4 + 50, 140),
-    const Offset(230 * 5 + 50, 140),
-    const Offset(230 * 0 + 50, 140),
-    const Offset(230 * 1 + 50, 140),
-    const Offset(230 * 2 + 50, 140),
-    const Offset(230 * 3 + 50, 140),
-    const Offset(230 * 4 + 50, 140),
-    const Offset(230 * 5 + 50, 140),
-  ];
-  final _gifts = [
-    _Member('Pete'),
-    _Member('Alan'),
-    _Member('Annie'),
-    _Member('Ben'),
-    _Member('Enn'),
-    _Member('Jack'),
-    _Member('Jeff'),
-    _Member('Jhen'),
-    _Member('Ken'),
-    _Member('R'),
-    _Member('Peter'),
-    _Member('Rita'),
-  ];
+class _Christmas2023ScreenState extends State<Christmas2023Screen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _playPauseAnimationController;
+  Timer? _timer;
+  final _animationDuration = const Duration(milliseconds: 200);
+  final _gifts = _members.map((member) => _Gift(member, member)).toList();
 
   @override
   void initState() {
     super.initState();
+    _playPauseAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('2023 聖誕交換禮物')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      appBar: AppBar(
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.red[800],
+        centerTitle: true,
+        title: const Text('Merry Christmas 2023 and Happy New Year 2024 !!!'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_outlined),
+            onPressed: () {
+              for (var member in _members) {
+                member.isExchange = true;
+              }
+            },
+          ),
+          IconButton(
+            icon: AnimatedIcon(
+              icon: AnimatedIcons.play_pause,
+              progress: _playPauseAnimationController,
+            ),
+            onPressed: () {
+              if (_timer?.isActive == true) {
+                _timer?.cancel();
+                _playPauseAnimationController.reverse();
+              } else {
+                _timer = Timer.periodic(
+                  _animationDuration,
+                  (timer) => _shuffleGifts(),
+                );
+                _playPauseAnimationController.forward();
+              }
+            },
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Image.asset(
+            'assets/christmas_wallpaper.png',
+            fit: BoxFit.cover,
+            height: double.infinity,
+            width: double.infinity,
+          ),
+          ..._members.map((member) => _buildMember(member)).toList(),
+          ..._gifts.map((gift) => _buildGift(gift)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMember(_Member member) {
+    return Positioned(
+      top: member.position.dy,
+      left: member.position.dx,
+      child: GestureDetector(
+        onTap: () => setState(() => member.isExchange = !member.isExchange),
         child: Stack(
           children: [
-            Positioned(
-              top: _memberPositions[0].dy,
-              left: _memberPositions[0].dx,
+            CircleAvatar(
+              backgroundColor:
+                  member.isExchange ? Colors.green[800] : Colors.green[200],
+              maxRadius: _memberMaxRadius,
               child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[0].name),
+                backgroundColor:
+                    member.isExchange ? Colors.green[700] : Colors.green[200],
+                maxRadius: _memberMaxRadius - 8,
+                child: Text(
+                  member.name,
+                  style:
+                      const TextStyle(color: Colors.black, fontSize: _textSize),
+                ),
               ),
             ),
             Positioned(
-              top: _memberPositions[1].dy,
-              left: _memberPositions[1].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[1].name),
-              ),
-            ),
-            Positioned(
-              top: _memberPositions[2].dy,
-              left: _memberPositions[2].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[2].name),
-              ),
-            ),
-            Positioned(
-              top: _memberPositions[3].dy,
-              left: _memberPositions[3].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[3].name),
-              ),
-            ),
-            Positioned(
-              top: _memberPositions[4].dy,
-              left: _memberPositions[4].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[4].name),
-              ),
-            ),
-            Positioned(
-              top: _memberPositions[5].dy,
-              left: _memberPositions[5].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[5].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[6].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[6].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[7].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[7].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[8].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[8].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[9].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[9].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[10].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[10].name),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: _memberPositions[11].dx,
-              child: CircleAvatar(
-                maxRadius: _avatarMaxRadius,
-                child: Text(_members[11].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[0].dy,
-              left: _giftPositions[0].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[0].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[1].dy,
-              left: _giftPositions[1].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[1].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[2].dy,
-              left: _giftPositions[2].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[2].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[3].dy,
-              left: _giftPositions[3].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[3].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[4].dy,
-              left: _giftPositions[4].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[4].name),
-              ),
-            ),
-            AnimatedPositioned(
-              top: _giftPositions[5].dy,
-              left: _giftPositions[5].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[5].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[6].dy,
-              left: _giftPositions[6].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[6].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[7].dy,
-              left: _giftPositions[7].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[7].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[8].dy,
-              left: _giftPositions[8].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[8].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[9].dy,
-              left: _giftPositions[9].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[9].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[10].dy,
-              left: _giftPositions[10].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[10].name),
-              ),
-            ),
-            AnimatedPositioned(
-              bottom: _giftPositions[11].dy,
-              left: _giftPositions[11].dx,
-              duration: duration,
-              child: CircleAvatar(
-                backgroundColor: _giftBackgroundColor,
-                maxRadius: _giftMaxRadius,
-                child: Text(_members[11].name),
+              right: 0,
+              child: Image.asset(
+                member.decoration,
+                width: 90,
+                height: 90,
               ),
             ),
           ],
@@ -307,10 +118,165 @@ class _Christmas2023ScreenState extends State<Christmas2023Screen> {
       ),
     );
   }
+
+  Widget _buildGift(_Gift gift) {
+    return AnimatedPositioned(
+      top: gift.receiver.giftBoxPosition.dy,
+      left: gift.receiver.giftBoxPosition.dx,
+      duration: _animationDuration,
+      curve: Curves.easeInOut,
+      child: CircleAvatar(
+        backgroundColor:
+            gift.receiver.isExchange ? Colors.amber[600] : Colors.amber[200],
+        maxRadius: _giftMaxRadius,
+        child: CircleAvatar(
+          backgroundColor:
+              gift.receiver.isExchange ? Colors.amber[500] : Colors.amber[200],
+          maxRadius: _giftMaxRadius - 8,
+          child: Text(
+            gift.sender.name,
+            style: const TextStyle(color: Colors.black, fontSize: _textSize),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _shuffleGifts() {
+    final List<_Gift> exchangeGifts =
+        _gifts.where((gift) => gift.receiver.isExchange).toList();
+
+    final List<_Member> receivers =
+        exchangeGifts.map((gift) => gift.receiver).toList()..shuffle();
+
+    for (var index = 0; index < exchangeGifts.length; index++) {
+      exchangeGifts[index].receiver = receivers[index];
+    }
+
+    setState(() => _gifts);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+}
+
+class _Gift {
+  final _Member sender;
+  _Member receiver;
+  final decoration = 'assets/christmas_present.png';
+
+  _Gift(this.sender, this.receiver);
 }
 
 class _Member {
   final String name;
+  final Offset position;
+  final Offset giftBoxPosition;
+  bool isExchange = true;
+  String decoration;
 
-  _Member(this.name);
+  _Member({
+    required this.name,
+    required this.position,
+    required this.giftBoxPosition,
+    this.decoration = 'assets/christmas_decoration_hat.png',
+  });
 }
+
+const _memberMaxRadius = 100.0;
+const _giftMaxRadius = 50.0;
+const _textSize = 25.0;
+const _firstRowTop = 16.0;
+const _secondRowTop = 590.0;
+const _paddingLeft = 15.0;
+const _horizonGap = 240;
+
+final _members = [
+  _Member(
+    name: 'Alan',
+    position: const Offset(_horizonGap * 0 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 0 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_giraffe.png',
+  ),
+  _Member(
+    name: 'Annie',
+    position: const Offset(_horizonGap * 1 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 1 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_isabelle.png',
+  ),
+  _Member(
+    name: 'Ben',
+    position: const Offset(_horizonGap * 2 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 2 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_ben.png',
+  ),
+  _Member(
+    name: 'Enn',
+    position: const Offset(_horizonGap * 3 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 3 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_spiderman.png',
+  ),
+  _Member(
+    name: 'Jack',
+    position: const Offset(_horizonGap * 4 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 4 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_fitness.png',
+  ),
+  _Member(
+    name: 'Jeff',
+    position: const Offset(_horizonGap * 5 + _paddingLeft, _firstRowTop),
+    giftBoxPosition:
+        const Offset(_horizonGap * 5 + 50 + _paddingLeft, _firstRowTop + 124),
+    decoration: 'assets/christmas_decoration_deer.png',
+  ),
+  _Member(
+    name: 'Jhen',
+    position: const Offset(_horizonGap * 0 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 0 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_dodoro.png',
+  ),
+  _Member(
+    name: 'Ken',
+    position: const Offset(_horizonGap * 1 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 1 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_owl.png',
+  ),
+  _Member(
+    name: 'Pete',
+    position: const Offset(_horizonGap * 2 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 2 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_pete.png',
+  ),
+  _Member(
+    name: 'Peter',
+    position: const Offset(_horizonGap * 3 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 3 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_doge.png',
+  ),
+  _Member(
+    name: 'R',
+    position: const Offset(_horizonGap * 4 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 4 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_r.png',
+  ),
+  _Member(
+    name: 'Rita',
+    position: const Offset(_horizonGap * 5 + _paddingLeft, _secondRowTop + 35),
+    giftBoxPosition:
+        const Offset(_horizonGap * 5 + 5 + _paddingLeft, _secondRowTop),
+    decoration: 'assets/christmas_decoration_grandpa.png',
+  ),
+];

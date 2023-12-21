@@ -99,8 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ListTile(
         leading: const Icon(CupertinoIcons.gift_fill),
         minLeadingWidth: 50,
-        title: const Text('2023 聖誕交換禮物'),
-        subtitle: const Text('主辦人: Pete'),
+        title: const Text('Merry Christmas 2023'),
+        subtitle: const Text('hoster: Pete'),
         trailing: trailing,
         onTap: () => Navigator.of(context).push(Christmas2023Screen.route),
       ),

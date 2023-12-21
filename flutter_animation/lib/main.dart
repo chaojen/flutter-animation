@@ -18,6 +18,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // 主題風格動畫
         colorScheme: ColorScheme.fromSeed(
